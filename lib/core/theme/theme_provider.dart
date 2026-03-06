@@ -36,17 +36,29 @@ final themeProvider = NotifierProvider<ThemeNotifier, AppThemeMode>(() {
 });
 
 class DarkModeNotifier extends Notifier<bool> {
+  static const _key = 'dark_mode';
+
   @override
   bool build() {
+    _load();
     return true; // Default to dark mode
   }
 
-  void toggle() {
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getBool(_key) ?? true;
+  }
+
+  Future<void> toggle() async {
     state = !state;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, state);
   }
   
-  void set(bool value) {
+  Future<void> set(bool value) async {
     state = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, state);
   }
 }
 

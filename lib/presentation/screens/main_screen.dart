@@ -37,6 +37,99 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
 
+  void _showShortcuts() {
+    final themeMode = ref.read(themeProvider);
+    final isDarkMode = ref.read(isDarkModeProvider);
+    final isNeu = themeMode == AppThemeMode.neubrutalism;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        shape: isNeu ? const RoundedRectangleBorder(side: BorderSide(width: 3)) : null,
+        title: Text('KEYBOARD SHORTCUTS', 
+          style: TextStyle(fontWeight: isNeu ? FontWeight.w900 : FontWeight.bold, letterSpacing: 1.2)),
+        content: SizedBox(
+          width: 400,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _shortcutRow('Space', 'Play / Pause', isNeu),
+                _shortcutRow('← / →', 'Seek Backward / Forward', isNeu),
+                _shortcutRow('↑ / ↓', 'Volume Up / Down', isNeu),
+                _shortcutRow('L', 'Toggle Playlist', isNeu),
+                _shortcutRow('S', 'Stop Playback', isNeu),
+                _shortcutRow('N / P', 'Next / Previous Track', isNeu),
+                _shortcutRow(',', 'Open Settings', isNeu),
+                _shortcutRow('?', 'Show this Help', isNeu),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('CLOSE', style: TextStyle(fontWeight: isNeu ? FontWeight.w900 : FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddUrlDialog() {
+    final themeMode = ref.read(themeProvider);
+    final isNeu = themeMode == AppThemeMode.neubrutalism;
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: isNeu ? const RoundedRectangleBorder(side: BorderSide(width: 3)) : null,
+        title: Text('OPEN NETWORK URL', style: TextStyle(fontWeight: isNeu ? FontWeight.w900 : FontWeight.bold)),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'http://, rtsp://, etc.',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(playlistProvider.notifier).addUrl(controller.text);
+              Navigator.pop(context);
+            },
+            child: const Text('OPEN'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _shortcutRow(String key, String action, bool isNeu) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: isNeu ? null : Colors.white10,
+              border: isNeu ? Border.all(color: AppThemes.amphiBlue, width: 2) : Border.all(color: Colors.white24),
+              borderRadius: isNeu ? BorderRadius.zero : BorderRadius.circular(6),
+            ),
+            child: Text(key, style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, color: AppThemes.amphiBlue)),
+          ),
+          const SizedBox(width: 16),
+          Expanded(child: Text(action, style: const TextStyle(fontSize: 14))),
+        ],
+      ),
+    );
+  }
+
   void _handleKey(KeyEvent event) {
     if (event is KeyDownEvent) {
       final notifier = ref.read(playerProvider.notifier);
@@ -73,6 +166,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         case LogicalKeyboardKey.comma:
           Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
           break;
+        case LogicalKeyboardKey.slash:
+          if (HardwareKeyboard.instance.isShiftPressed) {
+            _showShortcuts();
+          }
+          break;
+        case LogicalKeyboardKey.f1:
+          _showShortcuts();
+          break;
       }
     }
   }
@@ -104,6 +205,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ],
           ),
           actions: [
+            _ControlIconButton(
+              icon: Icons.help_outline_rounded,
+              onPressed: _showShortcuts,
+              isNeu: isNeu,
+              borderColor: borderColor,
+              tooltip: 'Keyboard Shortcuts (?)',
+            ),
+            const SizedBox(width: 8),
             _ControlIconButton(
               icon: _showPlaylist ? Icons.featured_play_list_rounded : Icons.playlist_play_rounded,
               onPressed: () => setState(() => _showPlaylist = !_showPlaylist),
@@ -175,6 +284,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                     onPressed: () => playerNotifier.pickAndPlay(),
                                     icon: const Icon(Icons.add_rounded),
                                     label: const Text('OPEN MEDIA', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextButton.icon(
+                                    onPressed: _showAddUrlDialog,
+                                    icon: const Icon(Icons.link_rounded),
+                                    label: const Text('OPEN URL'),
                                   ),
                                 ],
                               ),
@@ -313,7 +428,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('PLAYLIST', style: TextStyle(fontWeight: isNeu ? FontWeight.w900 : FontWeight.bold, fontSize: 18)),
-                          IconButton(icon: const Icon(Icons.add_box_rounded), onPressed: () => playerNotifier.pickAndPlay()),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.add_link_rounded, size: 20), 
+                                onPressed: _showAddUrlDialog,
+                                tooltip: 'Add Network URL',
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add_box_rounded, size: 20), 
+                                onPressed: () => playerNotifier.pickAndPlay(),
+                                tooltip: 'Add Files',
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -325,8 +453,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                           final item = playlistState.items[index];
                           final isSelected = playlistState.currentIndex == index;
                           return ListTile(
-                            leading: Icon(item.isVideo ? Icons.movie_rounded : Icons.audiotrack_rounded, 
-                                          color: isSelected ? AppThemes.amphiBlue : null),
+                            leading: Icon(
+                              item.isNetwork ? Icons.cloud_queue_rounded : (item.isVideo ? Icons.movie_rounded : Icons.audiotrack_rounded), 
+                              color: isSelected ? AppThemes.amphiBlue : null,
+                            ),
                             title: Text(item.title, 
                                         style: TextStyle(
                                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
