@@ -80,7 +80,6 @@ class PlayerNotifier extends Notifier<AmphiPlayerState> {
     player.stream.volume.listen((vol) => state = state.copyWith(volume: vol));
     player.stream.buffering.listen((isBuffering) => state = state.copyWith(isBuffering: isBuffering));
     
-    // Track handling
     player.stream.tracks.listen((tracks) {
       state = state.copyWith(
         audioTracks: tracks.audio,
@@ -118,6 +117,17 @@ class PlayerNotifier extends Notifier<AmphiPlayerState> {
       if (previous?.defaultVolume != next.defaultVolume && state.fileName == null) {
         player.setVolume(next.defaultVolume);
       }
+      
+      // Video Filters
+      if (previous?.brightness != next.brightness) player.setProperty('brightness', (next.brightness * 100).toInt());
+      if (previous?.contrast != next.contrast) player.setProperty('contrast', (next.contrast * 100).toInt());
+      if (previous?.saturation != next.saturation) player.setProperty('saturation', (next.saturation * 100).toInt());
+      if (previous?.hue != next.hue) player.setProperty('hue', (next.hue * 100).toInt());
+
+      // Audio EQ
+      if (previous?.equalizerBands != next.equalizerBands) {
+        player.setProperty('equalizer', next.equalizerBands.join(' '));
+      }
     });
 
     ref.onDispose(() => player.dispose());
@@ -129,30 +139,26 @@ class PlayerNotifier extends Notifier<AmphiPlayerState> {
     final settings = ref.read(settingsProvider);
     await player.open(Media(item.path));
     await player.setRate(settings.playbackSpeed);
+    
+    player.setProperty('brightness', (settings.brightness * 100).toInt());
+    player.setProperty('contrast', (settings.contrast * 100).toInt());
+    player.setProperty('saturation', (settings.saturation * 100).toInt());
+    player.setProperty('hue', (settings.hue * 100).toInt());
+    player.setProperty('equalizer', settings.equalizerBands.join(' '));
+    
     state = state.copyWith(fileName: item.title);
   }
 
-  Future<void> setAudioTrack(AudioTrack track) async {
-    await player.setAudioTrack(track);
-  }
-
-  Future<void> setSubtitleTrack(SubtitleTrack track) async {
-    await player.setSubtitleTrack(track);
-  }
+  Future<void> setAudioTrack(AudioTrack track) async => await player.setAudioTrack(track);
+  Future<void> setSubtitleTrack(SubtitleTrack track) async => await player.setSubtitleTrack(track);
 
   Future<void> loadExternalSubtitle() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['srt', 'ass', 'vtt', 'ssa'],
     );
-
     if (result != null && result.files.single.path != null) {
-      // media_kit allows adding external subtitles via SubtitleTrack.uri
-      final track = SubtitleTrack.uri(
-        result.files.single.path!,
-        title: result.files.single.name,
-        language: 'External',
-      );
+      final track = SubtitleTrack.uri(result.files.single.path!, title: result.files.single.name, language: 'External');
       await player.setSubtitleTrack(track);
     }
   }
@@ -160,10 +166,9 @@ class PlayerNotifier extends Notifier<AmphiPlayerState> {
   Future<void> pickAndPlay() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['mp3', 'wav', 'ogg', 'mp4', 'mkv', 'avi', 'mov'],
+      allowedExtensions: ['mp3', 'wav', 'ogg', 'mp4', 'mkv', 'avi', 'mov', 'webm'],
       allowMultiple: true,
     );
-
     if (result != null && result.paths.isNotEmpty) {
       final validPaths = result.paths.whereType<String>().toList();
       ref.read(playlistProvider.notifier).addItems(validPaths);
