@@ -19,8 +19,8 @@ ApplicationWindow {
     property bool isDarkMode: settings.isDarkMode
     property color primaryColor: "#0EA5E9"
     property color bgApp: isDarkMode ? "#020617" : "#F1F5F9"
-    property color bgSurface: isDarkMode ? "#800F172A" : "#80FFFFFF"
-    property color outlineColor: isDarkMode ? "#20334155" : "#20E2E8F0"
+    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF"
+    property color outlineColor: isDarkMode ? "#334155" : "#E2E8F0"
     property color textMain: isDarkMode ? "#F8FAFC" : "#0F172A"
     property color textMuted: isDarkMode ? "#94A3B8" : "#64748B"
 
@@ -314,6 +314,14 @@ ApplicationWindow {
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 4
                                 
+                                ToolButton {
+                                    text: player.videoFit === 0 ? "Fit" : "Fill"
+                                    font.pixelSize: 10
+                                    contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                    background: Item {}
+                                    onClicked: player.videoFit = (player.videoFit === 0 ? 1 : 0)
+                                }
+
                                 ToolButton {
                                     text: player.playbackSpeed.toFixed(2) + "x"
                                     font.pixelSize: 10
