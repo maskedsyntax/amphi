@@ -37,6 +37,7 @@ qt_add_qml_module(amphi
         assets/icons/sun.svg
         assets/icons/moon.svg
         assets/icons/folder-open.svg
+        assets/icons/camera.svg
 )
 
 target_include_directories(amphi PRIVATE ${MPV_INCLUDE_DIRS})

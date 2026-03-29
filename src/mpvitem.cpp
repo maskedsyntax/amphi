@@ -256,6 +256,10 @@ void MpvItem::load(const QString &url) {
     emit titleChanged();
 }
 
+#include <QStandardPaths>
+#include <QDateTime>
+#include <QDir>
+
 void MpvItem::addSubtitle(const QString &url) {
     if (!mpv) return;
     QString path = url;
@@ -265,6 +269,24 @@ void MpvItem::addSubtitle(const QString &url) {
     QByteArray utf8Path = path.toUtf8();
     const char *args[] = {"sub-add", utf8Path.constData(), "select", nullptr};
     mpv_command(mpv, args);
+}
+
+void MpvItem::screenshot() {
+    if (!mpv) return;
+    
+    QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    QString filename = QString("Amphi_%1.png").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+    QString fullPath = QDir(desktopPath).absoluteFilePath(filename);
+    
+    QByteArray utf8Path = fullPath.toUtf8();
+    const char *args[] = {"screenshot-to-file", utf8Path.constData(), "video", nullptr};
+    int res = mpv_command(mpv, args);
+    
+    if (res >= 0) {
+        qDebug() << "Screenshot saved to:" << fullPath;
+    } else {
+        qWarning() << "Screenshot failed:" << mpv_error_string(res);
+    }
 }
 
 void MpvItem::play() {

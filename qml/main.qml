@@ -19,8 +19,8 @@ ApplicationWindow {
     property bool isDarkMode: settings.isDarkMode
     property color primaryColor: "#0EA5E9"
     property color bgApp: isDarkMode ? "#020617" : "#F1F5F9"
-    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF"
-    property color outlineColor: isDarkMode ? "#334155" : "#E2E8F0"
+    property color bgSurface: isDarkMode ? "#800F172A" : "#80FFFFFF"
+    property color outlineColor: isDarkMode ? "#20334155" : "#20E2E8F0"
     property color textMain: isDarkMode ? "#F8FAFC" : "#0F172A"
     property color textMuted: isDarkMode ? "#94A3B8" : "#64748B"
 
@@ -107,6 +107,7 @@ ApplicationWindow {
     Shortcut { sequence: "F"; onActivated: toggleFullscreen() }
     Shortcut { sequence: "Space"; onActivated: { player.isPlaying ? player.pause() : player.play(); showControls() } }
     Shortcut { sequence: "M"; onActivated: toggleMute() }
+    Shortcut { sequence: "S"; onActivated: { player.screenshot(); showControls() } }
     Shortcut { sequence: "Left"; onActivated: { player.setPosition(Math.max(0, player.position - 5)); showControls() } }
     Shortcut { sequence: "Right"; onActivated: { player.setPosition(Math.min(player.duration, player.position + 5)); showControls() } }
     Shortcut { sequence: "Up"; onActivated: { player.setVolume(Math.min(100, player.volume + 5)); showControls() } }
@@ -168,7 +169,13 @@ ApplicationWindow {
             Item { Layout.fillWidth: true }
 
             RowLayout {
-                spacing: 4
+                spacing: 2
+                ToolButton {
+                    icon.source: "qrc:/amphi/assets/icons/camera.svg"
+                    icon.color: textMain; icon.width: 18; icon.height: 18
+                    onClicked: player.screenshot(); background: null
+                    visible: player.mediaUrl !== ""
+                }
                 ToolButton {
                     icon.source: "qrc:/amphi/assets/icons/folder-open.svg"
                     icon.color: textMain; icon.width: 18; icon.height: 18
@@ -240,7 +247,7 @@ ApplicationWindow {
                 Rectangle {
                     id: playbackPanel
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 100
+                    Layout.preferredHeight: 85
                     color: bgSurface; radius: 16; border.color: outlineColor; border.width: 1
                     opacity: controlsVisible ? 1.0 : 0.0
                     visible: opacity > 0
@@ -257,7 +264,7 @@ ApplicationWindow {
                             spacing: 10
                             Text { text: formatTime(player.position); color: primaryColor; font.pixelSize: 11; font.bold: true; font.family: "Menlo" }
                             Slider {
-                                Layout.fillWidth: true; Layout.preferredHeight: 24
+                                Layout.fillWidth: true; Layout.preferredHeight: 20
                                 from: 0; to: player.duration > 0 ? player.duration : 1
                                 value: player.position
                                 onMoved: player.setPosition(value)
@@ -271,31 +278,31 @@ ApplicationWindow {
 
                             RowLayout {
                                 anchors.centerIn: parent
-                                spacing: 32
+                                spacing: 24
 
                                 RowLayout {
-                                    spacing: 12
+                                    spacing: 8
                                     ToolButton {
                                         icon.source: "qrc:/amphi/assets/icons/skip-back.svg"
-                                        icon.color: textMain; icon.width: 18; icon.height: 18
+                                        icon.color: textMain; icon.width: 16; icon.height: 16
                                         onClicked: playlistModel.previous(); background: null
                                     }
                                     RoundButton {
-                                        implicitWidth: 44; implicitHeight: 44
+                                        implicitWidth: 38; implicitHeight: 38
                                         icon.source: player.isPlaying ? "qrc:/amphi/assets/icons/pause.svg" : "qrc:/amphi/assets/icons/play.svg"
-                                        icon.color: "white"; icon.width: 22; icon.height: 22
-                                        background: Rectangle { radius: 22; color: primaryColor }
+                                        icon.color: "white"; icon.width: 18; icon.height: 18
+                                        background: Rectangle { radius: 19; color: primaryColor }
                                         onClicked: player.isPlaying ? player.pause() : player.play()
                                     }
                                     ToolButton {
                                         icon.source: "qrc:/amphi/assets/icons/skip-forward.svg"
-                                        icon.color: textMain; icon.width: 18; icon.height: 18
+                                        icon.color: textMain; icon.width: 16; icon.height: 16
                                         onClicked: playlistModel.next(); background: null
                                     }
                                 }
 
                                 RowLayout {
-                                    spacing: 8
+                                    spacing: 4
                                     ToolButton {
                                         icon.source: player.volume === 0 ? "qrc:/amphi/assets/icons/volume-x.svg" : "qrc:/amphi/assets/icons/volume-2.svg"
                                         icon.color: textMain; icon.width: 16; icon.height: 16
@@ -303,7 +310,7 @@ ApplicationWindow {
                                         onClicked: toggleMute()
                                     }
                                     Slider {
-                                        width: 100; from: 0; to: 100; value: player.volume
+                                        width: 80; from: 0; to: 100; value: player.volume
                                         onMoved: player.setVolume(value)
                                     }
                                 }
@@ -312,7 +319,7 @@ ApplicationWindow {
                             RowLayout {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: 4
+                                spacing: 0
                                 
                                 ToolButton {
                                     text: player.videoFit === 0 ? "Fit" : "Fill"
