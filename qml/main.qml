@@ -19,14 +19,17 @@ ApplicationWindow {
     property bool isDarkMode: settings.isDarkMode
     property color primaryColor: "#0EA5E9"
     property color bgApp: isDarkMode ? "#020617" : "#F1F5F9"
-    property color bgSurface: isDarkMode ? "#800F172A" : "#80FFFFFF"
-    property color outlineColor: isDarkMode ? "#20334155" : "#20E2E8F0"
+    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF"
+    property color outlineColor: isDarkMode ? "#334155" : "#E2E8F0"
     property color textMain: isDarkMode ? "#F8FAFC" : "#0F172A"
     property color textMuted: isDarkMode ? "#94A3B8" : "#64748B"
 
     property bool showQueue: settings.showQueue
     property bool controlsVisible: true
     property int lastVolume: 100
+    property bool stayOnTop: settings.stayOnTop
+
+    flags: stayOnTop ? (Qt.Window | Qt.WindowStaysOnTopHint) : Qt.Window
 
     color: bgApp
 
@@ -39,6 +42,7 @@ ApplicationWindow {
         property bool isDarkMode: true
         property bool showQueue: true
         property int volume: 100
+        property bool stayOnTop: false
     }
 
     Component.onDestruction: {
@@ -49,6 +53,7 @@ ApplicationWindow {
         settings.isDarkMode = window.isDarkMode
         settings.showQueue = window.showQueue
         settings.volume = player.volume
+        settings.stayOnTop = window.stayOnTop
     }
 
     function toggleFullscreen() {
@@ -103,11 +108,13 @@ ApplicationWindow {
         hideControlsTimer.restart()
     }
 
+    // Hotkeys
     Shortcut { sequence: "Q"; onActivated: { showQueue = !showQueue; showControls() } }
     Shortcut { sequence: "F"; onActivated: toggleFullscreen() }
     Shortcut { sequence: "Space"; onActivated: { player.isPlaying ? player.pause() : player.play(); showControls() } }
     Shortcut { sequence: "M"; onActivated: toggleMute() }
     Shortcut { sequence: "S"; onActivated: { player.screenshot(); showControls() } }
+    Shortcut { sequence: "P"; onActivated: { stayOnTop = !stayOnTop; showControls() } }
     Shortcut { sequence: "Left"; onActivated: { player.setPosition(Math.max(0, player.position - 5)); showControls() } }
     Shortcut { sequence: "Right"; onActivated: { player.setPosition(Math.min(player.duration, player.position + 5)); showControls() } }
     Shortcut { sequence: "Up"; onActivated: { player.setVolume(Math.min(100, player.volume + 5)); showControls() } }
@@ -163,7 +170,7 @@ ApplicationWindow {
                 color: textMain
                 font.pixelSize: 14; font.bold: true
                 elide: Text.ElideMiddle
-                Layout.maximumWidth: parent.width * 0.7
+                Layout.maximumWidth: parent.width * 0.6
             }
 
             Item { Layout.fillWidth: true }
@@ -171,25 +178,40 @@ ApplicationWindow {
             RowLayout {
                 spacing: 2
                 ToolButton {
+                    icon.source: stayOnTop ? "qrc:/amphi/assets/icons/pin.svg" : "qrc:/amphi/assets/icons/pin-off.svg"
+                    icon.color: stayOnTop ? primaryColor : textMain; icon.width: 18; icon.height: 18
+                    onClicked: stayOnTop = !stayOnTop; background: null
+                    ToolTip.text: "Stay on Top (P)"
+                    ToolTip.visible: hovered
+                }
+                ToolButton {
                     icon.source: "qrc:/amphi/assets/icons/camera.svg"
                     icon.color: textMain; icon.width: 18; icon.height: 18
                     onClicked: player.screenshot(); background: null
                     visible: player.mediaUrl !== ""
+                    ToolTip.text: "Take Screenshot (S)"
+                    ToolTip.visible: hovered
                 }
                 ToolButton {
                     icon.source: "qrc:/amphi/assets/icons/folder-open.svg"
                     icon.color: textMain; icon.width: 18; icon.height: 18
                     onClicked: fileDialog.open(); background: null
+                    ToolTip.text: "Open Files"
+                    ToolTip.visible: hovered
                 }
                 ToolButton {
                     icon.source: "qrc:/amphi/assets/icons/list-video.svg"
                     icon.color: showQueue ? primaryColor : textMain; icon.width: 18; icon.height: 18
                     onClicked: showQueue = !showQueue; background: null
+                    ToolTip.text: "Toggle Queue (Q)"
+                    ToolTip.visible: hovered
                 }
                 ToolButton {
                     icon.source: isDarkMode ? "qrc:/amphi/assets/icons/sun.svg" : "qrc:/amphi/assets/icons/moon.svg"
                     icon.color: textMain; icon.width: 18; icon.height: 18
                     onClicked: isDarkMode = !isDarkMode; background: null
+                    ToolTip.text: "Toggle Theme"
+                    ToolTip.visible: hovered
                 }
             }
         }

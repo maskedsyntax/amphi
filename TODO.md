@@ -18,7 +18,7 @@
 
 ## 🔵 Phase 3: Power User Utilities
 - [x] **Screenshot Utility**: One-click high-quality frame capture saved to Desktop.
-- [ ] **Stay on Top**: A "Pin" mode to keep Amphi above all other windows.
+- [x] **Stay on Top**: A "Pin" mode to keep Amphi above all other windows.
 - [ ] **Network Streams**: Support for "Open URL" (YouTube, Twitch, HLS) via `yt-dlp` integration.
 - [ ] **Audio Equalizer**: A simple 10-band UI to tweak sound profiles.
 
