@@ -50,6 +50,11 @@ ApplicationWindow {
         settings.volume = player.volume
     }
 
+    function toggleFullscreen() {
+        window.visibility = window.visibility === Window.FullScreen ? Window.Windowed : Window.FullScreen
+        showControls()
+    }
+
     DropArea {
         anchors.fill: parent
         onDropped: (drop) => {
@@ -88,7 +93,7 @@ ApplicationWindow {
     }
 
     Shortcut { sequence: "Q"; onActivated: { showQueue = !showQueue; showControls() } }
-    Shortcut { sequence: "F"; onActivated: { window.visibility = window.visibility === Window.FullScreen ? Window.Windowed : Window.FullScreen; showControls() } }
+    Shortcut { sequence: "F"; onActivated: toggleFullscreen() }
     Shortcut { sequence: "Space"; onActivated: { player.isPlaying ? player.pause() : player.play(); showControls() } }
 
     FileDialog {
@@ -192,6 +197,12 @@ ApplicationWindow {
                     color: "black"; radius: 12; clip: true
 
                     MpvVideo { id: player; anchors.fill: parent; volume: settings.volume }
+
+                    // DOUBLE CLICK FULLSCREEN & TOGGLE PLAY
+                    TapHandler {
+                        acceptedButtons: Qt.LeftButton
+                        onTapped: if (tapCount === 2) toggleFullscreen()
+                    }
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -302,7 +313,7 @@ ApplicationWindow {
                                     }
                                 }
                                 ToolButton {
-                                    text: "Subs"; font.pixelSize: 10
+                                    text: "Subs"; font.pixelSize: 10; visible: player.subtitleTracks.length > 0
                                     contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                     background: Item {}
                                     onClicked: subMenu.open()
