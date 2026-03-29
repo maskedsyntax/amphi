@@ -15,6 +15,7 @@ class MpvItem : public QQuickFramebufferObject {
     Q_PROPERTY(int volume READ volume WRITE setVolume NOTIFY volumeChanged)
     Q_PROPERTY(double audioDelay READ audioDelay WRITE setAudioDelay NOTIFY audioDelayChanged)
     Q_PROPERTY(double subtitleDelay READ subtitleDelay WRITE setSubtitleDelay NOTIFY subtitleDelayChanged)
+    Q_PROPERTY(double playbackSpeed READ playbackSpeed WRITE setPlaybackSpeed NOTIFY playbackSpeedChanged)
     
     // Tracks
     Q_PROPERTY(QVariantList audioTracks READ audioTracks NOTIFY tracksChanged)
@@ -47,6 +48,9 @@ public:
     double subtitleDelay() const { return m_subtitleDelay; }
     void setSubtitleDelay(double delay);
 
+    double playbackSpeed() const { return m_playbackSpeed; }
+    void setPlaybackSpeed(double speed);
+
     // Tracks
     QVariantList audioTracks() const { return m_audioTracks; }
     QVariantList subtitleTracks() const { return m_subtitleTracks; }
@@ -70,6 +74,7 @@ signals:
     void volumeChanged();
     void audioDelayChanged();
     void subtitleDelayChanged();
+    void playbackSpeedChanged();
     void tracksChanged();
     void endOfFile();
 
@@ -86,6 +91,7 @@ private:
     int m_volume = 100;
     double m_audioDelay = 0.0;
     double m_subtitleDelay = 0.0;
+    double m_playbackSpeed = 1.0;
 
     // Tracks
     QVariantList m_audioTracks;

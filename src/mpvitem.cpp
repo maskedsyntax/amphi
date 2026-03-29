@@ -101,6 +101,7 @@ MpvItem::MpvItem(QQuickItem *parent) : QQuickFramebufferObject(parent) {
     mpv_observe_property(mpv, 0, "volume", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "audio-delay", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "sub-delay", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv, 0, "speed", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "track-list", MPV_FORMAT_NODE);
 
     mpv_set_wakeup_callback(mpv, on_mpv_events, this);
@@ -152,6 +153,9 @@ void MpvItem::handleMpvEvent(mpv_event *event) {
         } else if (strcmp(prop->name, "sub-delay") == 0 && prop->format == MPV_FORMAT_DOUBLE) {
             m_subtitleDelay = *static_cast<double *>(prop->data);
             emit subtitleDelayChanged();
+        } else if (strcmp(prop->name, "speed") == 0 && prop->format == MPV_FORMAT_DOUBLE) {
+            m_playbackSpeed = *static_cast<double *>(prop->data);
+            emit playbackSpeedChanged();
         } else if (strcmp(prop->name, "track-list") == 0) {
             updateTracks();
         }
@@ -296,4 +300,9 @@ void MpvItem::setAudioDelay(double delay) {
 void MpvItem::setSubtitleDelay(double delay) {
     if (!mpv) return;
     mpv_set_property(mpv, "sub-delay", MPV_FORMAT_DOUBLE, &delay);
+}
+
+void MpvItem::setPlaybackSpeed(double speed) {
+    if (!mpv) return;
+    mpv_set_property(mpv, "speed", MPV_FORMAT_DOUBLE, &speed);
 }

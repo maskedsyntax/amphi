@@ -19,8 +19,8 @@ ApplicationWindow {
     property bool isDarkMode: settings.isDarkMode
     property color primaryColor: "#0EA5E9"
     property color bgApp: isDarkMode ? "#020617" : "#F1F5F9"
-    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF"
-    property color outlineColor: isDarkMode ? "#334155" : "#E2E8F0"
+    property color bgSurface: isDarkMode ? "#800F172A" : "#80FFFFFF"
+    property color outlineColor: isDarkMode ? "#20334155" : "#20E2E8F0"
     property color textMain: isDarkMode ? "#F8FAFC" : "#0F172A"
     property color textMuted: isDarkMode ? "#94A3B8" : "#64748B"
 
@@ -257,7 +257,7 @@ ApplicationWindow {
                             spacing: 10
                             Text { text: formatTime(player.position); color: primaryColor; font.pixelSize: 11; font.bold: true; font.family: "Menlo" }
                             Slider {
-                                Layout.fillWidth: true; Layout.preferredHeight: 20
+                                Layout.fillWidth: true; Layout.preferredHeight: 24
                                 from: 0; to: player.duration > 0 ? player.duration : 1
                                 value: player.position
                                 onMoved: player.setPosition(value)
@@ -271,31 +271,31 @@ ApplicationWindow {
 
                             RowLayout {
                                 anchors.centerIn: parent
-                                spacing: 24
+                                spacing: 32
 
                                 RowLayout {
-                                    spacing: 8
+                                    spacing: 12
                                     ToolButton {
                                         icon.source: "qrc:/amphi/assets/icons/skip-back.svg"
-                                        icon.color: textMain; icon.width: 16; icon.height: 16
+                                        icon.color: textMain; icon.width: 18; icon.height: 18
                                         onClicked: playlistModel.previous(); background: null
                                     }
                                     RoundButton {
-                                        implicitWidth: 38; implicitHeight: 38
+                                        implicitWidth: 44; implicitHeight: 44
                                         icon.source: player.isPlaying ? "qrc:/amphi/assets/icons/pause.svg" : "qrc:/amphi/assets/icons/play.svg"
-                                        icon.color: "white"; icon.width: 18; icon.height: 18
-                                        background: Rectangle { radius: 19; color: primaryColor }
+                                        icon.color: "white"; icon.width: 22; icon.height: 22
+                                        background: Rectangle { radius: 22; color: primaryColor }
                                         onClicked: player.isPlaying ? player.pause() : player.play()
                                     }
                                     ToolButton {
                                         icon.source: "qrc:/amphi/assets/icons/skip-forward.svg"
-                                        icon.color: textMain; icon.width: 16; icon.height: 16
+                                        icon.color: textMain; icon.width: 18; icon.height: 18
                                         onClicked: playlistModel.next(); background: null
                                     }
                                 }
 
                                 RowLayout {
-                                    spacing: 4
+                                    spacing: 8
                                     ToolButton {
                                         icon.source: player.volume === 0 ? "qrc:/amphi/assets/icons/volume-x.svg" : "qrc:/amphi/assets/icons/volume-2.svg"
                                         icon.color: textMain; icon.width: 16; icon.height: 16
@@ -303,7 +303,7 @@ ApplicationWindow {
                                         onClicked: toggleMute()
                                     }
                                     Slider {
-                                        width: 80; from: 0; to: 100; value: player.volume
+                                        width: 100; from: 0; to: 100; value: player.volume
                                         onMoved: player.setVolume(value)
                                     }
                                 }
@@ -312,8 +312,28 @@ ApplicationWindow {
                             RowLayout {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: 0
+                                spacing: 4
                                 
+                                ToolButton {
+                                    text: player.playbackSpeed.toFixed(2) + "x"
+                                    font.pixelSize: 10
+                                    contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                    background: Item {}
+                                    onClicked: speedMenu.open()
+                                    Menu {
+                                        id: speedMenu
+                                        Repeater {
+                                            model: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0]
+                                            MenuItem {
+                                                text: modelData.toFixed(2) + "x"
+                                                checkable: true
+                                                checked: Math.abs(player.playbackSpeed - modelData) < 0.01
+                                                onTriggered: player.playbackSpeed = modelData
+                                            }
+                                        }
+                                    }
+                                }
+
                                 ToolButton {
                                     text: "Audio"; font.pixelSize: 10; visible: player.audioTracks.length > 1
                                     contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
