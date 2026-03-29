@@ -115,6 +115,7 @@ ApplicationWindow {
     Shortcut { sequence: "M"; onActivated: toggleMute() }
     Shortcut { sequence: "S"; onActivated: { player.screenshot(); showControls() } }
     Shortcut { sequence: "P"; onActivated: { stayOnTop = !stayOnTop; showControls() } }
+    Shortcut { sequence: "U"; onActivated: { urlDialog.open(); showControls() } }
     Shortcut { sequence: "Left"; onActivated: { player.setPosition(Math.max(0, player.position - 5)); showControls() } }
     Shortcut { sequence: "Right"; onActivated: { player.setPosition(Math.min(player.duration, player.position + 5)); showControls() } }
     Shortcut { sequence: "Up"; onActivated: { player.setVolume(Math.min(100, player.volume + 5)); showControls() } }
@@ -133,6 +134,44 @@ ApplicationWindow {
         title: "Load external subtitle"
         nameFilters: ["Subtitle files (*.srt *.ass *.vtt *.ssa)"]
         onAccepted: { player.addSubtitle(selectedFile); showControls() }
+    }
+
+    Dialog {
+        id: urlDialog
+        title: "Open Network Stream"
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        
+        background: Rectangle {
+            color: bgSurface
+            radius: 12
+            border.color: outlineColor
+        }
+
+        ColumnLayout {
+            spacing: 12
+            width: 400
+            Text {
+                text: "Enter URL (YouTube, Twitch, HLS, etc.):"
+                color: textMain
+                font.bold: true
+            }
+            TextField {
+                id: urlField
+                Layout.fillWidth: true
+                placeholderText: "https://..."
+                selectByMouse: true
+                focus: true
+                onAccepted: urlDialog.accept()
+            }
+        }
+        onAccepted: {
+            if (urlField.text !== "") {
+                playlistModel.addFile(urlField.text)
+                urlField.text = ""
+            }
+        }
     }
 
     Connections {
@@ -177,6 +216,13 @@ ApplicationWindow {
 
             RowLayout {
                 spacing: 2
+                ToolButton {
+                    icon.source: "qrc:/amphi/assets/icons/globe.svg"
+                    icon.color: textMain; icon.width: 18; icon.height: 18
+                    onClicked: urlDialog.open(); background: null
+                    ToolTip.text: "Open URL (U)"
+                    ToolTip.visible: hovered
+                }
                 ToolButton {
                     icon.source: stayOnTop ? "qrc:/amphi/assets/icons/pin.svg" : "qrc:/amphi/assets/icons/pin-off.svg"
                     icon.color: stayOnTop ? primaryColor : textMain; icon.width: 18; icon.height: 18
