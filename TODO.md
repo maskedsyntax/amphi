@@ -20,7 +20,7 @@
 - [x] **Screenshot Utility**: One-click high-quality frame capture saved to Desktop.
 - [x] **Stay on Top**: A "Pin" mode to keep Amphi above all other windows.
 - [x] **Network Streams**: Support for "Open URL" (YouTube, Twitch, HLS) via `yt-dlp` integration.
-- [ ] **Audio Equalizer**: A simple 10-band UI to tweak sound profiles.
+- [x] **Audio Equalizer**: A simple 10-band UI to tweak sound profiles.
 
 ## 🟣 Phase 4: Distribution & Platform Support
 - [ ] **macOS Bundling**: Script to create a standalone, portable `Amphi.app`.

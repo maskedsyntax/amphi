@@ -17,6 +17,7 @@ class MpvItem : public QQuickFramebufferObject {
     Q_PROPERTY(double subtitleDelay READ subtitleDelay WRITE setSubtitleDelay NOTIFY subtitleDelayChanged)
     Q_PROPERTY(double playbackSpeed READ playbackSpeed WRITE setPlaybackSpeed NOTIFY playbackSpeedChanged)
     Q_PROPERTY(int videoFit READ videoFit WRITE setVideoFit NOTIFY videoFitChanged)
+    Q_PROPERTY(QVariantList equalizerBands READ equalizerBands WRITE setEqualizerBands NOTIFY equalizerChanged)
     
     // Tracks
     Q_PROPERTY(QVariantList audioTracks READ audioTracks NOTIFY tracksChanged)
@@ -55,6 +56,9 @@ public:
     int videoFit() const { return m_videoFit; }
     void setVideoFit(int fit);
 
+    QVariantList equalizerBands() const { return m_equalizerBands; }
+    void setEqualizerBands(const QVariantList &bands);
+
     // Tracks
     QVariantList audioTracks() const { return m_audioTracks; }
     QVariantList subtitleTracks() const { return m_subtitleTracks; }
@@ -81,6 +85,7 @@ signals:
     void subtitleDelayChanged();
     void playbackSpeedChanged();
     void videoFitChanged();
+    void equalizerChanged();
     void tracksChanged();
     void endOfFile();
 
@@ -99,6 +104,7 @@ private:
     double m_subtitleDelay = 0.0;
     double m_playbackSpeed = 1.0;
     int m_videoFit = 0;
+    QVariantList m_equalizerBands;
 
     // Tracks
     QVariantList m_audioTracks;

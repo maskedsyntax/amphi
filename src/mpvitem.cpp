@@ -81,6 +81,7 @@ private:
 };
 
 MpvItem::MpvItem(QQuickItem *parent) : QQuickFramebufferObject(parent) {
+    for (int i = 0; i < 10; ++i) m_equalizerBands.append(0.0);
     setlocale(LC_NUMERIC, "C");
     mpv = mpv_create();
     if (!mpv) {
@@ -340,4 +341,18 @@ void MpvItem::setVideoFit(int fit) {
     double panscan = (fit == 1) ? 1.0 : 0.0;
     mpv_set_property(mpv, "panscan", MPV_FORMAT_DOUBLE, &panscan);
     emit videoFitChanged();
+}
+
+void MpvItem::setEqualizerBands(const QVariantList &bands) {
+    if (!mpv || bands.count() != 10) return;
+    m_equalizerBands = bands;
+    
+    QString filter = "equalizer=";
+    for (int i = 0; i < 10; ++i) {
+        filter += QString("g%1=%2:").arg(i).arg(bands[i].toDouble());
+    }
+    filter.chop(1); // remove last colon
+    
+    mpv_set_property_string(mpv, "af", filter.toUtf8().constData());
+    emit equalizerChanged();
 }

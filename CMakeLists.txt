@@ -41,6 +41,7 @@ qt_add_qml_module(amphi
         assets/icons/pin.svg
         assets/icons/pin-off.svg
         assets/icons/globe.svg
+        assets/icons/sliders.svg
 )
 
 target_include_directories(amphi PRIVATE ${MPV_INCLUDE_DIRS})

@@ -116,6 +116,7 @@ ApplicationWindow {
     Shortcut { sequence: "S"; onActivated: { player.screenshot(); showControls() } }
     Shortcut { sequence: "P"; onActivated: { stayOnTop = !stayOnTop; showControls() } }
     Shortcut { sequence: "U"; onActivated: { urlDialog.open(); showControls() } }
+    Shortcut { sequence: "E"; onActivated: { eqDialog.open(); showControls() } }
     Shortcut { sequence: "Left"; onActivated: { player.setPosition(Math.max(0, player.position - 5)); showControls() } }
     Shortcut { sequence: "Right"; onActivated: { player.setPosition(Math.min(player.duration, player.position + 5)); showControls() } }
     Shortcut { sequence: "Up"; onActivated: { player.setVolume(Math.min(100, player.volume + 5)); showControls() } }
@@ -142,35 +143,51 @@ ApplicationWindow {
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Ok | Dialog.Cancel
-        
-        background: Rectangle {
-            color: bgSurface
-            radius: 12
-            border.color: outlineColor
-        }
-
+        background: Rectangle { color: bgSurface; radius: 12; border.color: outlineColor }
         ColumnLayout {
-            spacing: 12
-            width: 400
-            Text {
-                text: "Enter URL (YouTube, Twitch, HLS, etc.):"
-                color: textMain
-                font.bold: true
-            }
+            spacing: 12; width: 400
+            Text { text: "Enter URL (YouTube, Twitch, HLS, etc.):"; color: textMain; font.bold: true }
             TextField {
-                id: urlField
-                Layout.fillWidth: true
-                placeholderText: "https://..."
-                selectByMouse: true
-                focus: true
+                id: urlField; Layout.fillWidth: true; placeholderText: "https://..."; selectByMouse: true; focus: true
                 onAccepted: urlDialog.accept()
             }
         }
-        onAccepted: {
-            if (urlField.text !== "") {
-                playlistModel.addFile(urlField.text)
-                urlField.text = ""
+        onAccepted: { if (urlField.text !== "") { playlistModel.addFile(urlField.text); urlField.text = "" } }
+    }
+
+    Dialog {
+        id: eqDialog
+        title: "Audio Equalizer"
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Reset | Dialog.Close
+        background: Rectangle { color: bgSurface; radius: 12; border.color: outlineColor }
+        
+        RowLayout {
+            spacing: 12
+            Repeater {
+                model: ["64", "125", "250", "500", "1k", "2k", "4k", "8k", "12k", "16k"]
+                ColumnLayout {
+                    spacing: 8
+                    Slider {
+                        orientation: Qt.Vertical
+                        from: -12; to: 12; stepSize: 0.1
+                        value: player.equalizerBands[index]
+                        onMoved: {
+                            let bands = player.equalizerBands
+                            bands[index] = value
+                            player.equalizerBands = bands
+                        }
+                        Layout.preferredHeight: 150
+                    }
+                    Text { text: modelData; color: textMain; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                }
             }
+        }
+        onReset: {
+            let bands = []
+            for (let i = 0; i < 10; ++i) bands.push(0.0)
+            player.equalizerBands = bands
         }
     }
 
@@ -216,6 +233,13 @@ ApplicationWindow {
 
             RowLayout {
                 spacing: 2
+                ToolButton {
+                    icon.source: "qrc:/amphi/assets/icons/sliders.svg"
+                    icon.color: textMain; icon.width: 18; icon.height: 18
+                    onClicked: eqDialog.open(); background: null
+                    ToolTip.text: "Equalizer (E)"
+                    ToolTip.visible: hovered
+                }
                 ToolButton {
                     icon.source: "qrc:/amphi/assets/icons/globe.svg"
                     icon.color: textMain; icon.width: 18; icon.height: 18
