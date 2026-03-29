@@ -5,7 +5,7 @@
 - [x] **Drag & Drop**: Allow dragging files/folders directly from the OS into the window to queue them.
 - [x] **External Subtitles**: Add a dialog to manually load `.srt`, `.ass`, or `.vtt` files.
 - [x] **Double-Click Fullscreen**: Add mouse gesture support to toggle fullscreen mode.
-- [ ] **Global Hotkeys**: 
+- [x] **Global Hotkeys**: 
     - `Left/Right Arrows`: Skip 5s
     - `Up/Down Arrows`: Volume +/- 5%
     - `M`: Mute toggle
