@@ -1,8 +1,8 @@
 # Amphi Player TODO List
 
 ## 🟢 Phase 1: UX & Essential Polish
-- [ ] **Auto-Hide Controls**: Implement "Ghost Mode" where the UI fades out after 3 seconds of mouse inactivity.
-- [ ] **Drag & Drop**: Allow dragging files/folders directly from the OS into the window to queue them.
+- [x] **Auto-Hide Controls**: Implement "Ghost Mode" where the UI fades out after 3 seconds of mouse inactivity.
+- [x] **Drag & Drop**: Allow dragging files/folders directly from the OS into the window to queue them.
 - [ ] **External Subtitles**: Add a dialog to manually load `.srt`, `.ass`, or `.vtt` files.
 - [ ] **Double-Click Fullscreen**: Add mouse gesture support to toggle fullscreen mode.
 - [ ] **Global Hotkeys**: 

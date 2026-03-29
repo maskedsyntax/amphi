@@ -239,6 +239,17 @@ void MpvItem::load(const QString &url) {
     emit titleChanged();
 }
 
+void MpvItem::addSubtitle(const QString &url) {
+    if (!mpv) return;
+    QString path = url;
+    if (path.startsWith("file://")) {
+        path = QUrl(url).toLocalFile();
+    }
+    QByteArray utf8Path = path.toUtf8();
+    const char *args[] = {"sub-add", utf8Path.constData(), "select", nullptr};
+    mpv_command(mpv, args);
+}
+
 void MpvItem::play() {
     if (!mpv) return;
     int pause = 0;

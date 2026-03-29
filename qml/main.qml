@@ -19,7 +19,7 @@ ApplicationWindow {
     property bool isDarkMode: settings.isDarkMode
     property color primaryColor: "#0EA5E9"
     property color bgApp: isDarkMode ? "#020617" : "#F1F5F9"
-    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF" // 70% opacity
+    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF"
     property color outlineColor: isDarkMode ? "#334155" : "#E2E8F0"
     property color textMain: isDarkMode ? "#F8FAFC" : "#0F172A"
     property color textMuted: isDarkMode ? "#94A3B8" : "#64748B"
@@ -50,7 +50,27 @@ ApplicationWindow {
         settings.volume = player.volume
     }
 
-    // Auto-Hide Logic
+    DropArea {
+        anchors.fill: parent
+        onDropped: (drop) => {
+            if (drop.hasUrls) {
+                let mediaUrls = []
+                let subUrls = []
+                for (let url of drop.urls) {
+                    let str = url.toString().toLowerCase()
+                    if (str.endsWith(".srt") || str.endsWith(".ass") || str.endsWith(".vtt")) {
+                        subUrls.push(url)
+                    } else {
+                        mediaUrls.push(url)
+                    }
+                }
+                if (mediaUrls.length > 0) playlistModel.addFiles(mediaUrls)
+                if (subUrls.length > 0 && player.mediaUrl !== "") player.addSubtitle(subUrls[0])
+                showControls()
+            }
+        }
+    }
+
     Timer {
         id: hideControlsTimer
         interval: 3000
@@ -77,6 +97,13 @@ ApplicationWindow {
         currentFolder: StandardPaths.writableLocation(StandardPaths.MoviesLocation)
         fileMode: FileDialog.OpenFiles
         onAccepted: { playlistModel.addFiles(selectedFiles); showControls() }
+    }
+
+    FileDialog {
+        id: subDialog
+        title: "Load external subtitle"
+        nameFilters: ["Subtitle files (*.srt *.ass *.vtt *.ssa)"]
+        onAccepted: { player.addSubtitle(selectedFile); showControls() }
     }
 
     Connections {
@@ -140,11 +167,8 @@ ApplicationWindow {
         }
     }
 
-    // Main Content Area
     Item {
         anchors.fill: parent
-
-        // Background Mouse Tracker (On bottom)
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
@@ -266,7 +290,7 @@ ApplicationWindow {
                                 ToolButton {
                                     text: "Audio"; font.pixelSize: 10; visible: player.audioTracks.length > 1
                                     contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    background: Item {} // Truly transparent
+                                    background: Item {}
                                     onClicked: audioMenu.open()
                                     Menu {
                                         id: audioMenu
@@ -278,9 +302,9 @@ ApplicationWindow {
                                     }
                                 }
                                 ToolButton {
-                                    text: "Subs"; font.pixelSize: 10; visible: player.subtitleTracks.length > 0
+                                    text: "Subs"; font.pixelSize: 10
                                     contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    background: Item {} // Truly transparent
+                                    background: Item {}
                                     onClicked: subMenu.open()
                                     Menu {
                                         id: subMenu
@@ -290,6 +314,8 @@ ApplicationWindow {
                                             MenuItem { text: modelData.title; onTriggered: player.setCurrentSubtitleTrack(modelData.id) }
                                             onObjectAdded: (index, object) => subMenu.addItem(object)
                                         }
+                                        MenuSeparator {}
+                                        MenuItem { text: "Load External..."; onTriggered: subDialog.open() }
                                     }
                                 }
                             }

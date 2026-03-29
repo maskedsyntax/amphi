@@ -51,6 +51,7 @@ public:
     Q_INVOKABLE void pause();
     Q_INVOKABLE void stop();
     Q_INVOKABLE void load(const QString &url);
+    Q_INVOKABLE void addSubtitle(const QString &url);
 
 signals:
     void mediaUrlChanged();
