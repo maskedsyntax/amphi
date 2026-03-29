@@ -26,6 +26,7 @@ ApplicationWindow {
 
     property bool showQueue: settings.showQueue
     property bool controlsVisible: true
+    property int lastVolume: 100
 
     color: bgApp
 
@@ -52,6 +53,16 @@ ApplicationWindow {
 
     function toggleFullscreen() {
         window.visibility = window.visibility === Window.FullScreen ? Window.Windowed : Window.FullScreen
+        showControls()
+    }
+
+    function toggleMute() {
+        if (player.volume > 0) {
+            lastVolume = player.volume
+            player.setVolume(0)
+        } else {
+            player.setVolume(lastVolume > 0 ? lastVolume : 100)
+        }
         showControls()
     }
 
@@ -92,9 +103,15 @@ ApplicationWindow {
         hideControlsTimer.restart()
     }
 
+    // Hotkeys
     Shortcut { sequence: "Q"; onActivated: { showQueue = !showQueue; showControls() } }
     Shortcut { sequence: "F"; onActivated: toggleFullscreen() }
     Shortcut { sequence: "Space"; onActivated: { player.isPlaying ? player.pause() : player.play(); showControls() } }
+    Shortcut { sequence: "M"; onActivated: toggleMute() }
+    Shortcut { sequence: "Left"; onActivated: { player.setPosition(Math.max(0, player.position - 5)); showControls() } }
+    Shortcut { sequence: "Right"; onActivated: { player.setPosition(Math.min(player.duration, player.position + 5)); showControls() } }
+    Shortcut { sequence: "Up"; onActivated: { player.setVolume(Math.min(100, player.volume + 5)); showControls() } }
+    Shortcut { sequence: "Down"; onActivated: { player.setVolume(Math.max(0, player.volume - 5)); showControls() } }
 
     FileDialog {
         id: fileDialog
@@ -198,7 +215,6 @@ ApplicationWindow {
 
                     MpvVideo { id: player; anchors.fill: parent; volume: settings.volume }
 
-                    // DOUBLE CLICK FULLSCREEN & TOGGLE PLAY
                     TapHandler {
                         acceptedButtons: Qt.LeftButton
                         onTapped: if (tapCount === 2) toggleFullscreen()
@@ -284,7 +300,8 @@ ApplicationWindow {
                                     ToolButton {
                                         icon.source: player.volume === 0 ? "qrc:/amphi/assets/icons/volume-x.svg" : "qrc:/amphi/assets/icons/volume-2.svg"
                                         icon.color: textMain; icon.width: 16; icon.height: 16
-                                        background: null; enabled: false
+                                        background: null; 
+                                        onClicked: toggleMute()
                                     }
                                     Slider {
                                         width: 80; from: 0; to: 100; value: player.volume
