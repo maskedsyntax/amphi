@@ -15,11 +15,14 @@ qt_add_executable(amphi
     src/main.cpp
     src/mpvitem.cpp
     src/mpvitem.h
+    src/playlistmodel.cpp
+    src/playlistmodel.h
 )
 
 qt_add_qml_module(amphi
-    URI Amphi
+    URI amphi
     VERSION 1.0
+    RESOURCE_PREFIX /
     QML_FILES
         qml/main.qml
     RESOURCES
