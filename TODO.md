@@ -11,8 +11,8 @@
     - `M`: Mute toggle
 
 ## 🟡 Phase 2: Advanced Playback & Sync
-- [ ] **Audio Synchronization**: Add an offset control (e.g., +/- 100ms) to fix delayed audio.
-- [ ] **Subtitle Synchronization**: Add an offset control to realign subtitles with the dialogue.
+- [x] **Audio Synchronization**: Add an offset control (e.g., +/- 100ms) to fix delayed audio.
+- [x] **Subtitle Synchronization**: Add an offset control to realign subtitles with the dialogue.
 - [ ] **Playback Speed**: Add a menu to adjust speed from 0.5x to 4.0x.
 - [ ] **Video Fit Modes**: Options for "Stretch to Fill", "Crop to Fill", and "Original Ratio".
 

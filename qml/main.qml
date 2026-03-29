@@ -103,7 +103,6 @@ ApplicationWindow {
         hideControlsTimer.restart()
     }
 
-    // Hotkeys
     Shortcut { sequence: "Q"; onActivated: { showQueue = !showQueue; showControls() } }
     Shortcut { sequence: "F"; onActivated: toggleFullscreen() }
     Shortcut { sequence: "Space"; onActivated: { player.isPlaying ? player.pause() : player.play(); showControls() } }
@@ -327,10 +326,23 @@ ApplicationWindow {
                                             MenuItem { text: modelData.title; onTriggered: player.setCurrentAudioTrack(modelData.id) }
                                             onObjectAdded: (index, object) => audioMenu.addItem(object)
                                         }
+                                        MenuSeparator { visible: player.audioTracks.length > 1 }
+                                        MenuItem {
+                                            text: "Delay: " + (player.audioDelay * 1000).toFixed(0) + "ms"
+                                            contentItem: RowLayout {
+                                                Text { text: "Audio Delay"; color: textMain; font.pixelSize: 11; Layout.fillWidth: true }
+                                                RowLayout {
+                                                    spacing: 4
+                                                    Button { text: "-"; flat: true; onClicked: player.audioDelay -= 0.1 }
+                                                    Text { text: (player.audioDelay * 1000).toFixed(0) + "ms"; color: textMain; font.pixelSize: 11; font.family: "Menlo" }
+                                                    Button { text: "+"; flat: true; onClicked: player.audioDelay += 0.1 }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 ToolButton {
-                                    text: "Subs"; font.pixelSize: 10; visible: player.subtitleTracks.length > 0
+                                    text: "Subs"; font.pixelSize: 10
                                     contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                     background: Item {}
                                     onClicked: subMenu.open()
@@ -344,6 +356,19 @@ ApplicationWindow {
                                         }
                                         MenuSeparator {}
                                         MenuItem { text: "Load External..."; onTriggered: subDialog.open() }
+                                        MenuSeparator {}
+                                        MenuItem {
+                                            text: "Delay: " + (player.subtitleDelay * 1000).toFixed(0) + "ms"
+                                            contentItem: RowLayout {
+                                                Text { text: "Sub Delay"; color: textMain; font.pixelSize: 11; Layout.fillWidth: true }
+                                                RowLayout {
+                                                    spacing: 4
+                                                    Button { text: "-"; flat: true; onClicked: player.subtitleDelay -= 0.1 }
+                                                    Text { text: (player.subtitleDelay * 1000).toFixed(0) + "ms"; color: textMain; font.pixelSize: 11; font.family: "Menlo" }
+                                                    Button { text: "+"; flat: true; onClicked: player.subtitleDelay += 0.1 }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

@@ -99,6 +99,8 @@ MpvItem::MpvItem(QQuickItem *parent) : QQuickFramebufferObject(parent) {
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG);
     mpv_observe_property(mpv, 0, "volume", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv, 0, "audio-delay", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv, 0, "sub-delay", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "track-list", MPV_FORMAT_NODE);
 
     mpv_set_wakeup_callback(mpv, on_mpv_events, this);
@@ -144,6 +146,12 @@ void MpvItem::handleMpvEvent(mpv_event *event) {
         } else if (strcmp(prop->name, "volume") == 0 && prop->format == MPV_FORMAT_DOUBLE) {
             m_volume = static_cast<int>(*static_cast<double *>(prop->data));
             emit volumeChanged();
+        } else if (strcmp(prop->name, "audio-delay") == 0 && prop->format == MPV_FORMAT_DOUBLE) {
+            m_audioDelay = *static_cast<double *>(prop->data);
+            emit audioDelayChanged();
+        } else if (strcmp(prop->name, "sub-delay") == 0 && prop->format == MPV_FORMAT_DOUBLE) {
+            m_subtitleDelay = *static_cast<double *>(prop->data);
+            emit subtitleDelayChanged();
         } else if (strcmp(prop->name, "track-list") == 0) {
             updateTracks();
         }
@@ -278,4 +286,14 @@ void MpvItem::setVolume(int vol) {
     if (!mpv) return;
     double dvol = vol;
     mpv_set_property(mpv, "volume", MPV_FORMAT_DOUBLE, &dvol);
+}
+
+void MpvItem::setAudioDelay(double delay) {
+    if (!mpv) return;
+    mpv_set_property(mpv, "audio-delay", MPV_FORMAT_DOUBLE, &delay);
+}
+
+void MpvItem::setSubtitleDelay(double delay) {
+    if (!mpv) return;
+    mpv_set_property(mpv, "sub-delay", MPV_FORMAT_DOUBLE, &delay);
 }
