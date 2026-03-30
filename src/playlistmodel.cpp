@@ -25,20 +25,20 @@ QHash<int, QByteArray> PlaylistModel::roleNames() const {
 }
 
 void PlaylistModel::addFile(const QUrl &url) {
-    beginInsertRows(QModelIndex(), m_items.count(), m_items.count());
+    int newIndex = m_items.count();
+    beginInsertRows(QModelIndex(), newIndex, newIndex);
     QString path = url.isLocalFile() ? url.toLocalFile() : url.toString();
     m_items.append({QFileInfo(path).fileName(), url.toString()});
     endInsertRows();
     emit countChanged();
 
-    if (m_currentIndex == -1) {
-        setCurrentIndex(0);
-    }
+    setCurrentIndex(newIndex);
 }
 
 void PlaylistModel::addFiles(const QList<QUrl> &urls) {
     if (urls.isEmpty()) return;
-    beginInsertRows(QModelIndex(), m_items.count(), m_items.count() + urls.count() - 1);
+    int firstNewIndex = m_items.count();
+    beginInsertRows(QModelIndex(), firstNewIndex, m_items.count() + urls.count() - 1);
     for (const auto &url : urls) {
         QString path = url.isLocalFile() ? url.toLocalFile() : url.toString();
         m_items.append({QFileInfo(path).fileName(), url.toString()});
@@ -46,9 +46,7 @@ void PlaylistModel::addFiles(const QList<QUrl> &urls) {
     endInsertRows();
     emit countChanged();
 
-    if (m_currentIndex == -1) {
-        setCurrentIndex(0);
-    }
+    setCurrentIndex(firstNewIndex);
 }
 
 void PlaylistModel::remove(int index) {

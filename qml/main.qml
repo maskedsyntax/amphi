@@ -19,7 +19,7 @@ ApplicationWindow {
     property bool isDarkMode: settings.isDarkMode
     property color primaryColor: "#0EA5E9"
     property color bgApp: isDarkMode ? "#020617" : "#F1F5F9"
-    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF"
+    property color bgSurface: isDarkMode ? "#B30F172A" : "#B3FFFFFF" // 70% opacity
     property color outlineColor: isDarkMode ? "#334155" : "#E2E8F0"
     property color textMain: isDarkMode ? "#F8FAFC" : "#0F172A"
     property color textMuted: isDarkMode ? "#94A3B8" : "#64748B"
@@ -307,11 +307,20 @@ ApplicationWindow {
                 spacing: 12
 
                 Rectangle {
+                    id: videoContainer
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     color: "black"; radius: 12; clip: true
+                    
+                    // Force rounded corners for the video area
+                    layer.enabled: true
+                    layer.smooth: true
 
-                    MpvVideo { id: player; anchors.fill: parent; volume: settings.volume }
+                    MpvVideo { 
+                        id: player
+                        anchors.fill: parent
+                        volume: settings.volume
+                    }
 
                     TapHandler {
                         acceptedButtons: Qt.LeftButton
@@ -368,10 +377,12 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
 
+                            // FIXED CENTERED CLUSTER
                             RowLayout {
                                 anchors.centerIn: parent
-                                spacing: 24
+                                spacing: 20
 
+                                // Transport
                                 RowLayout {
                                     spacing: 8
                                     ToolButton {
@@ -393,12 +404,13 @@ ApplicationWindow {
                                     }
                                 }
 
+                                // Volume
                                 RowLayout {
                                     spacing: 4
                                     ToolButton {
                                         icon.source: player.volume === 0 ? "qrc:/amphi/assets/icons/volume-x.svg" : "qrc:/amphi/assets/icons/volume-2.svg"
                                         icon.color: textMain; icon.width: 16; icon.height: 16
-                                        background: null; 
+                                        background: null
                                         onClicked: toggleMute()
                                     }
                                     Slider {
@@ -406,18 +418,79 @@ ApplicationWindow {
                                         onMoved: player.setVolume(value)
                                     }
                                 }
+
+                                // Tracks
+                                RowLayout {
+                                    spacing: 2
+                                    ToolButton {
+                                        icon.source: "qrc:/amphi/assets/icons/music.svg"
+                                        icon.color: textMain; icon.width: 16; icon.height: 16
+                                        background: null
+                                        onClicked: audioMenu.open()
+                                        Menu {
+                                            id: audioMenu
+                                            Repeater {
+                                                model: player.audioTracks
+                                                MenuItem { text: modelData.title; checkable: true; checked: modelData.id === player.currentAudioTrack; onTriggered: player.setCurrentAudioTrack(modelData.id) }
+                                            }
+                                            MenuSeparator { visible: player.audioTracks.length > 0 }
+                                            MenuItem {
+                                                text: "Delay: " + (player.audioDelay * 1000).toFixed(0) + "ms"
+                                                contentItem: RowLayout {
+                                                    Text { text: "Delay"; color: textMain; font.pixelSize: 11; Layout.fillWidth: true }
+                                                    RowLayout {
+                                                        spacing: 4
+                                                        Button { text: "-"; flat: true; onClicked: player.audioDelay -= 0.1 }
+                                                        Text { text: (player.audioDelay * 1000).toFixed(0) + "ms"; color: textMain; font.pixelSize: 11; font.family: "Menlo" }
+                                                        Button { text: "+"; flat: true; onClicked: player.audioDelay += 0.1 }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ToolButton {
+                                        icon.source: "qrc:/amphi/assets/icons/subtitles.svg"
+                                        icon.color: textMain; icon.width: 16; icon.height: 16
+                                        background: null
+                                        onClicked: subMenu.open()
+                                        Menu {
+                                            id: subMenu
+                                            MenuItem { text: "None"; checkable: true; checked: player.currentSubtitleTrack === -1; onTriggered: player.setCurrentSubtitleTrack(-1) }
+                                            Repeater {
+                                                model: player.subtitleTracks
+                                                MenuItem { text: modelData.title; checkable: true; checked: modelData.id === player.currentSubtitleTrack; onTriggered: player.setCurrentSubtitleTrack(modelData.id) }
+                                            }
+                                            MenuSeparator {}
+                                            MenuItem { text: "Load External..."; onTriggered: subDialog.open() }
+                                            MenuSeparator {}
+                                            MenuItem {
+                                                text: "Delay: " + (player.subtitleDelay * 1000).toFixed(0) + "ms"
+                                                contentItem: RowLayout {
+                                                    Text { text: "Delay"; color: textMain; font.pixelSize: 11; Layout.fillWidth: true }
+                                                    RowLayout {
+                                                        spacing: 4
+                                                        Button { text: "-"; flat: true; onClicked: player.subtitleDelay -= 0.1 }
+                                                        Text { text: (player.subtitleDelay * 1000).toFixed(0) + "ms"; color: textMain; font.pixelSize: 11; font.family: "Menlo" }
+                                                        Button { text: "+"; flat: true; onClicked: player.subtitleDelay += 0.1 }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
+                            // TIGHTLY GROUPED RIGHT SIDE BUTTONS
                             RowLayout {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: 0
+                                spacing: 4
                                 
                                 ToolButton {
                                     text: player.videoFit === 0 ? "Fit" : "Fill"
                                     font.pixelSize: 10
                                     contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    background: Item {}
+                                    background: null
                                     onClicked: player.videoFit = (player.videoFit === 0 ? 1 : 0)
                                 }
 
@@ -425,7 +498,7 @@ ApplicationWindow {
                                     text: player.playbackSpeed.toFixed(2) + "x"
                                     font.pixelSize: 10
                                     contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    background: Item {}
+                                    background: null
                                     onClicked: speedMenu.open()
                                     Menu {
                                         id: speedMenu
@@ -436,64 +509,6 @@ ApplicationWindow {
                                                 checkable: true
                                                 checked: Math.abs(player.playbackSpeed - modelData) < 0.01
                                                 onTriggered: player.playbackSpeed = modelData
-                                            }
-                                        }
-                                    }
-                                }
-
-                                ToolButton {
-                                    text: "Audio"; font.pixelSize: 10; visible: player.audioTracks.length > 1
-                                    contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    background: Item {}
-                                    onClicked: audioMenu.open()
-                                    Menu {
-                                        id: audioMenu
-                                        Instantiator {
-                                            model: player.audioTracks
-                                            MenuItem { text: modelData.title; onTriggered: player.setCurrentAudioTrack(modelData.id) }
-                                            onObjectAdded: (index, object) => audioMenu.addItem(object)
-                                        }
-                                        MenuSeparator { visible: player.audioTracks.length > 1 }
-                                        MenuItem {
-                                            text: "Delay: " + (player.audioDelay * 1000).toFixed(0) + "ms"
-                                            contentItem: RowLayout {
-                                                Text { text: "Audio Delay"; color: textMain; font.pixelSize: 11; Layout.fillWidth: true }
-                                                RowLayout {
-                                                    spacing: 4
-                                                    Button { text: "-"; flat: true; onClicked: player.audioDelay -= 0.1 }
-                                                    Text { text: (player.audioDelay * 1000).toFixed(0) + "ms"; color: textMain; font.pixelSize: 11; font.family: "Menlo" }
-                                                    Button { text: "+"; flat: true; onClicked: player.audioDelay += 0.1 }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                ToolButton {
-                                    text: "Subs"; font.pixelSize: 10
-                                    contentItem: Text { text: parent.text; font: parent.font; color: textMain; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    background: Item {}
-                                    onClicked: subMenu.open()
-                                    Menu {
-                                        id: subMenu
-                                        MenuItem { text: "None"; onTriggered: player.setCurrentSubtitleTrack(-1) }
-                                        Instantiator {
-                                            model: player.subtitleTracks
-                                            MenuItem { text: modelData.title; onTriggered: player.setCurrentSubtitleTrack(modelData.id) }
-                                            onObjectAdded: (index, object) => subMenu.addItem(object)
-                                        }
-                                        MenuSeparator {}
-                                        MenuItem { text: "Load External..."; onTriggered: subDialog.open() }
-                                        MenuSeparator {}
-                                        MenuItem {
-                                            text: "Delay: " + (player.subtitleDelay * 1000).toFixed(0) + "ms"
-                                            contentItem: RowLayout {
-                                                Text { text: "Sub Delay"; color: textMain; font.pixelSize: 11; Layout.fillWidth: true }
-                                                RowLayout {
-                                                    spacing: 4
-                                                    Button { text: "-"; flat: true; onClicked: player.subtitleDelay -= 0.1 }
-                                                    Text { text: (player.subtitleDelay * 1000).toFixed(0) + "ms"; color: textMain; font.pixelSize: 11; font.family: "Menlo" }
-                                                    Button { text: "+"; flat: true; onClicked: player.subtitleDelay += 0.1 }
-                                                }
                                             }
                                         }
                                     }

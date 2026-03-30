@@ -180,9 +180,13 @@ void MpvItem::updateTracks() {
     m_subtitleTracks.clear();
 
     mpv_node node;
-    if (mpv_get_property(mpv, "track-list", MPV_FORMAT_NODE, &node) < 0) return;
+    if (mpv_get_property(mpv, "track-list", MPV_FORMAT_NODE, &node) < 0) {
+        qWarning() << "MpvItem: failed to get track-list";
+        return;
+    }
 
     if (node.format == MPV_FORMAT_NODE_ARRAY) {
+        qDebug() << "MpvItem: updating tracks, total:" << node.u.list->num;
         for (int i = 0; i < node.u.list->num; i++) {
             mpv_node item = node.u.list->values[i];
             if (item.format != MPV_FORMAT_NODE_MAP) continue;
